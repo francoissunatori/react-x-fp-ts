@@ -4,7 +4,7 @@ import { pipe } from "fp-ts/lib/function";
 import { Type, Errors } from "io-ts";
 import { reporter } from "io-ts-reporters";
 
-export async function fetchJson<T, O, I>(
+export default async function fetchJson<T, O, I>(
   url: string,
   validator: Type<T, O, I>
   // init?: RequestInit

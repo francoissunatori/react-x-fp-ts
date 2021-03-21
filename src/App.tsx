@@ -1,4 +1,5 @@
 // https://dev.to/gcanti/getting-started-with-fp-ts-ord-5f1e
+import { useEffect, useState } from "react";
 import { Ord, min, max } from "fp-ts/lib/Ord";
 import { contramap } from "fp-ts/lib/Ord";
 import { pipe } from "fp-ts/lib/function";
@@ -12,7 +13,10 @@ import {
 } from "fp-ts/lib/Semigroup";
 import { getMonoid } from "fp-ts/lib/Array";
 import { ordNumber } from "fp-ts/lib/Ord";
+import { Either, left } from "fp-ts/lib/Either";
+import * as io from "io-ts";
 import Password from "./Password";
+import fetchJSON from "./fetchJSON";
 import "./styles.css";
 
 console.log(min(ordNumber)(2, 1));
@@ -76,10 +80,32 @@ console.log(
   )
 );
 
+const PostValidator = io.type({
+  userId: io.number,
+  id: io.number,
+  title: io.string,
+  body: io.string
+});
+
 export default function App() {
+  const [post, setPost] = useState<Either<Error | null, any>>(left(null));
+
   const foo = {
     bar: "hello"
   };
+
+  console.log(post);
+
+  useEffect(() => {
+    (async () => {
+      setPost(
+        await fetchJSON(
+          "https://jsonplaceholder.typicode.com/posts/1",
+          PostValidator
+        )
+      );
+    })();
+  }, []);
 
   return (
     <div className="App">
