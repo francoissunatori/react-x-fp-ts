@@ -16,30 +16,12 @@ import { getMonoid } from "fp-ts/lib/Array";
 import { ordNumber } from "fp-ts/lib/Ord";
 import { Either, left } from "fp-ts/lib/Either";
 import * as io from "io-ts";
+import { Lens } from "monocle-ts";
 import Password from "./Password";
 import fetchJSON from "./fetchJSON";
 import "./styles.css";
 
 console.log(min(ordNumber)(2, 1));
-
-type User = {
-  name: string;
-  age: number;
-};
-
-const byAge: Ord<User> = contramap((user: User) => user.age)(ordNumber);
-
-const getYounger = min(byAge);
-
-const getOlder = max(byAge);
-
-console.log(
-  getYounger({ name: "Guido", age: 48 }, { name: "Giulio", age: 45 }) // { name: 'Giulio', age: 45 }
-);
-
-console.log(
-  getOlder({ name: "Guido", age: 48 }, { name: "Giulio", age: 45 }) // { name: 'Guido', age: 48 }
-);
 
 interface Customer {
   name: string;
@@ -88,6 +70,30 @@ const PostValidator = io.type({
   body: io.string
 });
 
+type User = {
+  id: number;
+  name: string;
+  username: string;
+  email: string;
+  address: {
+    street: string;
+    suite: string;
+    city: string;
+    zipcode: string;
+    geo: {
+      lat: string;
+      lng: string;
+    };
+  };
+  phone: string;
+  website: string;
+  company: {
+    name: string;
+    catchPhrase: string;
+    bs: string;
+  };
+};
+
 const UserValidator = io.type({
   id: io.number,
   name: io.string,
@@ -126,24 +132,28 @@ export default function App() {
     })();
   }, []);
 
+  const lat = Lens.fromPath<User>()(["address", "geo", "lat"]);
+  const lng = Lens.fromPath<User>()(["address", "geo", "lng"]);
+
   return (
     <div className="App">
       <Password />
       {pipe(
         user,
         fromEither,
-        // O.map(({ bar }) =>
-        //   pipe(
-        //     bar,
-        //     O.fromNullable,
-        //     O.map((str) => str + 1)
-        //   )
-        // ),
-        // O.chain((str) => O.fromNullable({ bar: "foo" })),
-        // O.map(({ bar }) => bar),
+        O.map((user) => lat.get(user)),
         O.fold(
           () => null,
-          (data) => <div>{data.id}</div>
+          (data) => <div>{data}</div>
+        )
+      )}
+      {pipe(
+        user,
+        fromEither,
+        O.map((user) => lng.get(user)),
+        O.fold(
+          () => null,
+          (data) => <div>{data}</div>
         )
       )}
     </div>
