@@ -18,20 +18,10 @@ import { getSemigroup } from "fp-ts/lib/NonEmptyArray";
 import * as NEA from "fp-ts/lib/NonEmptyArray";
 import { getValidation } from "fp-ts/lib/Either";
 import { NonEmptyArray } from "fp-ts/lib/NonEmptyArray";
-import { mapLeft } from "fp-ts/lib/Either";
 import { sequenceT } from "fp-ts/lib/Apply";
 import { map } from "fp-ts/lib/Either";
+import { lift } from "./utils";
 import "./styles.css";
-
-function lift<E, A>(
-  check: (a: A) => E.Either<E, A>
-): (a: A) => E.Either<NonEmptyArray<E>, A> {
-  return (a) =>
-    pipe(
-      check(a),
-      mapLeft((a) => [a])
-    );
-}
 
 const minLength = (s: string): E.Either<string, string> =>
   s.length >= 6 ? E.right(s) : E.left("at least 6 characters");
