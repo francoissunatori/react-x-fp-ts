@@ -4,6 +4,7 @@ import { Ord, min, max } from "fp-ts/lib/Ord";
 import { contramap } from "fp-ts/lib/Ord";
 import { pipe } from "fp-ts/lib/function";
 import * as O from "fp-ts/lib/Option";
+import { fromEither } from "fp-ts/lib/Option";
 import {
   Semigroup,
   getStructSemigroup,
@@ -87,21 +88,39 @@ const PostValidator = io.type({
   body: io.string
 });
 
+const UserValidator = io.type({
+  id: io.number,
+  name: io.string,
+  username: io.string,
+  email: io.string,
+  address: io.type({
+    street: io.string,
+    suite: io.string,
+    city: io.string,
+    zipcode: io.string,
+    geo: io.type({
+      lat: io.string,
+      lng: io.string
+    })
+  }),
+  phone: io.string,
+  website: io.string,
+  company: io.type({
+    name: io.string,
+    catchPhrase: io.string,
+    bs: io.string
+  })
+});
+
 export default function App() {
-  const [post, setPost] = useState<Either<Error | null, any>>(left(null));
-
-  const foo = {
-    bar: "hello"
-  };
-
-  console.log(post);
+  const [user, setUser] = useState<Either<Error | null, any>>(left(null));
 
   useEffect(() => {
     (async () => {
-      setPost(
+      setUser(
         await fetchJSON(
-          "https://jsonplaceholder.typicode.com/posts/1",
-          PostValidator
+          "https://jsonplaceholder.typicode.com/users/1",
+          UserValidator
         )
       );
     })();
@@ -111,20 +130,20 @@ export default function App() {
     <div className="App">
       <Password />
       {pipe(
-        foo,
-        O.fromNullable,
-        O.map(({ bar }) =>
-          pipe(
-            bar,
-            O.fromNullable,
-            O.map((str) => str + 1)
-          )
-        ),
-        O.chain((str) => O.fromNullable({ bar: "foo" })),
-        O.map(({ bar }) => bar),
+        user,
+        fromEither,
+        // O.map(({ bar }) =>
+        //   pipe(
+        //     bar,
+        //     O.fromNullable,
+        //     O.map((str) => str + 1)
+        //   )
+        // ),
+        // O.chain((str) => O.fromNullable({ bar: "foo" })),
+        // O.map(({ bar }) => bar),
         O.fold(
           () => null,
-          (data) => <div>{data}</div>
+          (data) => <div>{data.id}</div>
         )
       )}
     </div>
